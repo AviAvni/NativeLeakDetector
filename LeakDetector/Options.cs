@@ -15,7 +15,7 @@ namespace LeakDetector
             HelpText = "Print the top stacks, sorted by top leak")]
         public int TopStacks { get; set; }
 
-        [Option('m', "minsamples", Required = false, DefaultValue = 0,
+        [Option('m', "minsamples", Required = false, DefaultValue = 0UL,
             HelpText = "The minimum number of samples a stack must have to be included in the output")]
         public ulong MinimumSamples { get; set; }
 
