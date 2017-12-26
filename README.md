@@ -1,14 +1,16 @@
-# NativeLeakDetector
+# Win32 Leak Detector
 
-This tool records, aggregates, and displays call stacks from specific ETW allocation events. It works only in live mode, when the collection and analysis happens on target process. Importantly, if the target process exits before the tool had a chance to print stacks, symbol resolution will fail, so it is more suitable for longer-running processes.
+This is a Win32 memory leak detector that instruments the Windows heap allocation APIs and collects real-time allocation information. It aggregates allocation stacks in real-time, and can display any memory allocated by an application that was not yet freed, helping identify and resolve memory leaks. It works only in live mode, and collects the `HeapAlloc` and `HeapFree` ETW events for a specified process. Unlike some other tools, this tool does not record every allocation and free event to a file on disk and analyzes them later -- for production processes with a heavy allocation load, this makes the difference between a working tool and a gigantic disk hog.
+
+Importantly, if the target process exits before the tool had a chance to print stacks, symbol resolution will fail, so it is more suitable for longer-running processes.
 
 > NOTE: This project is not done. There are still some unimplemented features, and the code hasn't been extensively tested. Caveat emptor, and pull requests welcome!
 
 ## Running
 
-Open a command prompt window as administrator, and try some of the following examples.
+Open a command prompt window as administrator, and try the example [Demo](Demo) program.
 
-Collect allocation events print the top leaked stacks when Ctrl+C is hit:
+Collect allocation events and print the top leaked stacks when Ctrl+C is hit:
 
 ```
 LeakDetector -p 7408
@@ -16,21 +18,12 @@ LeakDetector -p 7408
 
 ## Example Output
 
-Native process, heavy CPU consumption:
-
 ```
 18:26:32
 AllocateCount: 30
 FreeCount: 0
 AlocateSize: 5040
 FreeSize: 0
-        72016463
-        720F1923
-        7202AC12
-        7201BCF0
-    7FFF234B9314
-    7FFF234B920B
-    7FFF234B91BE
 ntdll.dll!NtTraceEvent+0xC
 ntdll.dll!RtlpLogHeapAllocateEvent+0x5F
 ntdll.dll!RtlpAllocateHeapInternal+0x411
@@ -50,13 +43,6 @@ AllocateCount: 20
 FreeCount: 0
 AlocateSize: 4000
 FreeSize: 0
-        72016463
-        720F1923
-        7202AC12
-        7201BCF0
-    7FFF234B9314
-    7FFF234B920B
-    7FFF234B91BE
 ntdll.dll!NtTraceEvent+0xC
 ntdll.dll!RtlpLogHeapAllocateEvent+0x5F
 ntdll.dll!RtlpAllocateHeapInternal+0x411
@@ -74,13 +60,6 @@ AllocateCount: 30
 FreeCount: 24
 AlocateSize: 3000
 FreeSize: 2400
-        72016463
-        720F1923
-        7202AC12
-        7201BCF0
-    7FFF234B9314
-    7FFF234B920B
-    7FFF234B91BE
 ntdll.dll!NtTraceEvent+0xC
 ntdll.dll!RtlpLogHeapAllocateEvent+0x5F
 ntdll.dll!RtlpAllocateHeapInternal+0x411
@@ -95,13 +74,6 @@ AllocateCount: 4
 FreeCount: 0
 AlocateSize: 800
 FreeSize: 0
-        72016463
-        720F1923
-        7202AC12
-        7201BCF0
-    7FFF234B9314
-    7FFF234B920B
-    7FFF234B91BE
 ntdll.dll!NtTraceEvent+0xC
 ntdll.dll!RtlpLogHeapAllocateEvent+0x5F
 ntdll.dll!RtlpAllocateHeapInternal+0x411
@@ -121,7 +93,8 @@ ntdll.dll!_RtlUserThreadStart+0x1B
 Kernel symbols are currently not resolved, and filtered out by default.
 
 ## Overhead
-TBD
+
+This tool does not inject anything into the target process, and relies only on ETW events. Furthermore, it does not use disk buffers, and processes events in real-time. Still, very high allocation rates combined with an otherwise loaded system can introduce additional overhead due to the event processing and aggregation. Further benchmarking is needed to establish more accurate estimates.
 
 ## Building
 
