@@ -16,6 +16,30 @@ Collect allocation events and print the top leaked stacks when Ctrl+C is hit:
 LeakDetector -p 7408
 ```
 
+Print the top stacks, sorted by top leak
+
+```
+  LeakDetector -T -p 7408
+```
+
+How often to print the stack summary in seconds
+
+```
+  LeakDetector -i 5 -p 7408
+```
+
+How many times to print a summary before quitting
+
+```
+  LeakDetector -c 5 -p 7408
+```
+
+Clear the screen between printouts
+
+```
+  LeakDetector -C -i 5 -p 7408
+```
+
 ## Example Output
 
 ```
